@@ -71,6 +71,14 @@
             margin-bottom: 15px;
             max-width: 80%;
             display: flex;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .incoming {
@@ -233,7 +241,7 @@
     </div>
     
     <div class="chat-messages">
-        <div class="message incoming">
+        <div class="message incoming visible">
             <img src="https://i.postimg.cc/7hzx35Jt/454.jpg" alt="Зоя" class="message-avatar">
             <div class="voice-message" onclick="playVoiceMessage(this, 25)">
                 <svg class="voice-message-icon" viewBox="0 0 24 24">
@@ -246,7 +254,7 @@
             </div>
         </div>
         
-        <div class="message incoming">
+        <div class="message incoming" id="second-voice-message">
             <img src="https://i.postimg.cc/7hzx35Jt/454.jpg" alt="Зоя" class="message-avatar">
             <div class="voice-message" onclick="playVoiceMessage(this, 42)">
                 <svg class="voice-message-icon" viewBox="0 0 24 24">
@@ -259,7 +267,7 @@
             </div>
         </div>
         
-        
+       
         </div>
     </div>
     
@@ -286,6 +294,21 @@
     </div>
 
     <script>
+        // Показываем первое сообщение сразу
+        document.addEventListener('DOMContentLoaded', function() {
+            // Показываем второе голосовое через 10 секунд
+            setTimeout(function() {
+                const secondMessage = document.getElementById('second-voice-message');
+                secondMessage.classList.add('visible');
+                
+                // Показываем текстовое сообщение через еще 3 секунды
+                setTimeout(function() {
+                    const textMessage = document.getElementById('text-message');
+                    textMessage.classList.add('visible');
+                }, 3000);
+            }, 10000);
+        });
+        
         // Текущее воспроизводимое сообщение
         let currentPlayingMessage = null;
         
