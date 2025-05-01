@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат с Зоей</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+            background-color: #e5ddd5;
+            background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e7195b6b733d9110b408f075d.png');
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            background-color: #f0f2f5;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .back-button {
+            margin-right: 15px;
+            display: none;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-name {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .contact-status {
+            font-size: 13px;
+            color: #667781;
+            margin-top: 2px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            display: flex;
+        }
+        
+        .incoming {
+            align-self: flex-start;
+        }
+        
+        .outgoing {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 8px;
+            align-self: flex-end;
+        }
+        
+        .outgoing .message-avatar {
+            margin-right: 0;
+            margin-left: 8px;
+        }
+        
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 8px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .incoming .message-content {
+            background-color: #ffffff;
+            border-top-left-radius: 2px;
+        }
+        
+        .outgoing .message-content {
+            background-color: #d9fdd3;
+            border-top-right-radius: 2px;
+        }
+        
+        .voice-message {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            width: 160px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        
+        .voice-message.playing {
+            background-color: rgba(0, 136, 204, 0.1);
+        }
+        
+        .voice-message-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            color: #0088cc;
+        }
+        
+        .voice-message-duration {
+            font-size: 13px;
+            color: #666;
+            margin-left: 8px;
+            min-width: 30px;
+            text-align: right;
+        }
+        
+        .voice-message-progress {
+            flex: 1;
+            height: 3px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            margin: 0 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .voice-message-progress-filled {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: #0088cc;
+            border-radius: 3px;
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+        
+        .input-area {
+            background-color: #f0f2f5;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 15px;
+            background-color: #ffffff;
+            margin: 5px 0;
+        }
+        
+        .action-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: none;
+            color: #54656f;
+            margin: 0 5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .send-button {
+            background-color: #0088cc;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .back-button {
+                display: block;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .voice-message {
+                width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <button class="back-button action-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <img src="https://i.postimg.cc/7hzx35Jt/454.jpg" alt="Зоя" class="avatar">
+        <div class="contact-info">
+            <div class="contact-name">Зоя</div>
+            <div class="contact-status">был(а) в сети недавно</div>
+        </div>
+    </div>
+    
+    <div class="chat-messages">
+        <div class="message incoming">
+            <img src="https://i.postimg.cc/7hzx35Jt/454.jpg" alt="Зоя" class="message-avatar">
+            <div class="voice-message" onclick="playVoiceMessage(this, 25)">
+                <svg class="voice-message-icon" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                </svg>
+                <div class="voice-message-progress">
+                    <div class="voice-message-progress-filled"></div>
+                </div>
+                <div class="voice-message-duration">0:25</div>
+            </div>
+        </div>
+        
+        <div class="message incoming">
+            <img src="https://i.postimg.cc/7hzx35Jt/454.jpg" alt="Зоя" class="message-avatar">
+            <div class="voice-message" onclick="playVoiceMessage(this, 42)">
+                <svg class="voice-message-icon" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                </svg>
+                <div class="voice-message-progress">
+                    <div class="voice-message-progress-filled"></div>
+                </div>
+                <div class="voice-message-duration">0:42</div>
+            </div>
+        </div>
+        
+        
+        </div>
+    </div>
+    
+    <div class="input-area">
+        <button class="action-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 9V12L14 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <input type="text" class="message-input" placeholder="Введите сообщение">
+        <button class="action-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="action-button send-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // Текущее воспроизводимое сообщение
+        let currentPlayingMessage = null;
+        
+        // Функция для воспроизведения голосового сообщения
+        function playVoiceMessage(element, durationSec) {
+            // Если кликнули на уже воспроизводимое сообщение - останавливаем
+            if (currentPlayingMessage === element) {
+                stopVoiceMessage(element);
+                currentPlayingMessage = null;
+                return;
+            }
+            
+            // Останавливаем предыдущее воспроизведение
+            if (currentPlayingMessage) {
+                stopVoiceMessage(currentPlayingMessage);
+            }
+            
+            // Устанавливаем текущее сообщение
+            currentPlayingMessage = element;
+            
+            // Получаем элементы прогресса и времени
+            const progressBar = element.querySelector('.voice-message-progress-filled');
+            const durationElement = element.querySelector('.voice-message-duration');
+            
+            // Добавляем класс playing для подсветки
+            element.classList.add('playing');
+            
+            // Запускаем анимацию прогресса
+            let timeLeft = durationSec;
+            updateDurationDisplay();
+            
+            function updateDurationDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                durationElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                
+                // Обновляем прогресс бар
+                const progressPercent = (timeLeft / durationSec) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Обновляем время
+                updateDurationDisplay();
+                
+                // Когда время вышло
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    element.classList.remove('playing');
+                    currentPlayingMessage = null;
+                }
+            }, 1000);
+            
+            // Сохраняем ID интервала для возможности остановки
+            element.dataset.intervalId = interval;
+        }
+        
+        // Функция для остановки воспроизведения
+        function stopVoiceMessage(element) {
+            if (!element) return;
+            
+            // Останавливаем интервал
+            if (element.dataset.intervalId) {
+                clearInterval(parseInt(element.dataset.intervalId));
+                delete element.dataset.intervalId;
+            }
+            
+            // Удаляем класс playing
+            element.classList.remove('playing');
+            
+            // Восстанавливаем исходное состояние прогресс-бара и времени
+            const progressBar = element.querySelector('.voice-message-progress-filled');
+            const durationElement = element.querySelector('.voice-message-duration');
+            const originalDuration = parseInt(element.onclick.toString().match(/playVoiceMessage\(this, (\d+)\)/)[1]);
+            
+            progressBar.style.width = '100%';
+            const minutes = Math.floor(originalDuration / 60);
+            const seconds = originalDuration % 60;
+            durationElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+        
+        // Остановка при клике вне сообщения
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.voice-message') && currentPlayingMessage) {
+                stopVoiceMessage(currentPlayingMessage);
+                currentPlayingMessage = null;
+            }
+        });
+    </script>
+</body>
+</html>
